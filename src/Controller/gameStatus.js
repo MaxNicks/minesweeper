@@ -1,30 +1,28 @@
-import {CLOSE, CLOSEZERO, BAND} from "../constants/state";
-import {updateCurrentElem} from "./updateElem";
+import {CLOSE, CLOSE_ZERO, BAND} from "../constants/state";
 import {disabledButtons} from "./disabledButtons";
 
-function blockAllButtons(arrButtons) {
+function blockAllButtons(ButtonsModel) {
 
-    arrButtons.forEach(elem => {
+    ButtonsModel.arr.forEach(elem => {
         if (elem.hasBomb) {
-            elem.state = BAND;
-            updateCurrentElem(elem);
+            ButtonsModel.setElemState(elem,BAND);
         }
     });
     disabledButtons();
 }
 
-export function gameStatus(arrButtons, result) {
-    let resultGame = document.getElementById("resultGame");
+export function gameStatus(ButtonsModel, result) {
+    const resultGame = document.getElementById("resultGame");
     resultGame.innerHTML = result;
-    blockAllButtons(arrButtons);
+    blockAllButtons(ButtonsModel);
 }
 
-export function checkDisabled(arrButtons, countCellsInt) {
-    let countButtonNotCheck = arrButtons.length - countCellsInt,
+export function checkDisabled(ButtonsModel) {
+    let countButtonNotCheck = ButtonsModel.arr.length - ButtonsModel.countCells,
         count = 0;
 
-    for (let i = 0; i < arrButtons.length; i++) {
-        if (arrButtons[i].state === CLOSE || arrButtons[i].state === CLOSEZERO) count++;
+    for (let i = 0; i < ButtonsModel.arr.length; i++) {
+        if (ButtonsModel.arr[i].state === CLOSE || ButtonsModel.arr[i].state === CLOSE_ZERO) count++;
     }
     return count === countButtonNotCheck;
 }

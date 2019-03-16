@@ -1,9 +1,18 @@
+import {CLOSE, CLOSE_ZERO, OPEN, BAND, FLAG} from "../constants/state";
+
 export default class Table {
 
-    static createButtonCells(countCells) {
+    constructor(tableGame, countCells) {
+        this.countCells = countCells;
+        this.tableGame = tableGame;
+        this.createTable(tableGame);
+        this.buttonsView = this.arrButtonsView();
+    }
+
+    createButtonCells() {
         let strCells = '<tr>';
 
-        for (let i = 0; i < countCells; i++) {
+        for (let i = 0; i < this.countCells; i++) {
             strCells += '<td><button><span></span></button></td>';
         }
         strCells += '</tr>';
@@ -11,11 +20,11 @@ export default class Table {
         return strCells
     }
 
-    static createFullTable(countCells) {
-        let strCells = Table.createButtonCells(countCells.value),
-            contents = '';
+    createFullTable() {
+        const strCells = this.createButtonCells();
+        let contents = '';
 
-        for (let i = 0; i < countCells.value; i++) {
+        for (let i = 0; i < this.countCells; i++) {
             contents += strCells;
         }
         contents = '<table><tbody>' + contents + '</tbody></table>';
@@ -23,10 +32,49 @@ export default class Table {
         return contents;
     }
 
-    static createTable() {
-        let countCells = document.getElementById("countCells"),
-            tableGame = document.getElementById("tableGame");
+    createTable() {
+        this.tableGame.innerHTML = this.createFullTable();
+    }
 
-        tableGame.innerHTML = Table.createFullTable(countCells);
+    arrButtonsView() {
+        return this.tableGame.getElementsByTagName("button");
+    }
+
+    updateCurrentElem(id, state, countBombs) {
+        Table.setButtonStyle(this.buttonsView[id], state, countBombs);
+    }
+
+    static setButtonStyle(elem, state, countBomb) {
+
+        switch (state) {
+            case OPEN: {
+                elem.className = "btn btn-info";
+                elem.firstElementChild.className = "fas fa-circle";
+                break;
+            }
+            case CLOSE: {
+                elem.className = "btn btn-success";
+                elem.innerHTML = `<spaw class="pl-1 pr-1">${countBomb}</spaw>`;
+                elem.disabled = true;
+                break;
+            }
+            case CLOSE_ZERO: {
+                elem.className = "btn btn-success";
+                elem.innerHTML = `<spaw class="pl-2 pr-2"></spaw>`;
+                elem.disabled = true;
+                break;
+            }
+            case FLAG: {
+                elem.className = "btn btn-warning";
+                elem.firstElementChild.className = "fas fa-check";
+                break;
+            }
+            case BAND: {
+                elem.className = "btn btn-danger";
+                elem.firstElementChild.className = "fas fa-bomb";
+                break;
+            }
+        }
+
     }
 }

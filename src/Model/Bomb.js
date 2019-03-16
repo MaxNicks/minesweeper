@@ -1,71 +1,64 @@
 import {randomWithoutRepeat} from "../utilities/generateRandom";
-import {CLOSE, CLOSEZERO} from "../constants/state";
-import {updateCurrentElem} from "../Controller/updateElem";
+import {CLOSE, CLOSE_ZERO} from "../constants/state";
 
-export default class Bomb {
+export function createBombs(ButtonsModel) {
 
-    static countBombsAround(arr, elem, size) {
-        Bomb.countBombsAroundElem(arr, elem, size);
+    let result = [];
+
+    if (ButtonsModel.countBombs > ButtonsModel.arr.length) {
+        throw new Error();
     }
 
-    static createBombs(arr, countBombs) {
-
-        let result = [];
-
-        if (countBombs > arr.length) {
-            throw new Error();
-        }
-
-        for (let i = 0; i < countBombs; i++) {
-            let randId = randomWithoutRepeat(arr.length, result);
-            arr[randId].hasBomb = true;
-        }
+    for (let i = 0; i < ButtonsModel.countBombs; i++) {
+        let randId = randomWithoutRepeat(ButtonsModel.arr.length, result);
+        ButtonsModel.setElemHasBomb(ButtonsModel.arr[randId], true);
     }
-
-    static countBombsAroundElem(arr, elem, size) {
-        let countBombs = 0;
-        let arrNeighbors = Bomb.getNeighbors(elem, size);
-
-        arrNeighbors.forEach(id => {
-            if(arr[id].hasBomb) countBombs++;
-        });
-
-        elem.state = CLOSE;
-        elem.countBombs = countBombs;
-        elem.checkompleted = true;
-
-        if (countBombs === 0) {
-            elem.state = CLOSEZERO;
-            Bomb.nextBombs(arr, arrNeighbors, size);
-        }
-        updateCurrentElem(elem);
-    }
-
-    static getNeighbors(elem, size) {
-        let arrNeighbors = [];
-
-        let countCellsNum = +size,
-            id = elem.id;
-
-        if (id === 0) arrNeighbors.push(id+1, id+countCellsNum+1, id+countCellsNum);
-        else if (id === countCellsNum-1) arrNeighbors.push(id+countCellsNum, id+countCellsNum-1, id-1);
-        else if (id === countCellsNum*countCellsNum-countCellsNum) arrNeighbors.push(id-countCellsNum, id-countCellsNum+1, id+1);
-        else if (id === countCellsNum*countCellsNum-1) arrNeighbors.push(id-1, id-countCellsNum-1, id-countCellsNum);
-
-        else if (id > 0 && id < countCellsNum-1) arrNeighbors.push(id+1, id+countCellsNum+1, id+countCellsNum, id+countCellsNum-1, id-1);
-        else if (id > countCellsNum*countCellsNum-countCellsNum && id < countCellsNum*countCellsNum-1) arrNeighbors.push(id-1, id-countCellsNum-1, id-countCellsNum, id-countCellsNum+1, id+1);
-        else if (id % countCellsNum === 0) arrNeighbors.push(id-countCellsNum, id-countCellsNum+1, id+1, id+countCellsNum+1, id+countCellsNum);
-        else if ((id + 1) % countCellsNum === 0) arrNeighbors.push(id+countCellsNum, id+countCellsNum-1, id-1, id-countCellsNum-1, id-countCellsNum);
-        else arrNeighbors.push(id-countCellsNum, id-countCellsNum+1, id+1, id+countCellsNum+1, id+countCellsNum, id+countCellsNum-1, id-1, id-countCellsNum-1);
-
-        return arrNeighbors;
-    }
-
-
-    static nextBombs(arr, arrNeighbors, size) {
-        arrNeighbors.forEach(id => {
-                if(!arr[id].checkompleted) Bomb.countBombsAroundElem(arr, arr[id], size);
-        })
-    }
-
 }
+
+export function countBombsAroundElem(ButtonsModel, elem) {
+    let countBombs = 0;
+    let arrNeighbors = getNeighbors(elem, ButtonsModel.countCells);
+
+    arrNeighbors.forEach(id => {
+        if(ButtonsModel.getElemHasBomb(id)) countBombs++;
+    });
+
+    ButtonsModel.setElemState(elem, CLOSE);
+    ButtonsModel.setElemCountBombs(elem, countBombs);
+
+    if (countBombs === 0) {
+        ButtonsModel.setElemState(elem, CLOSE_ZERO);
+        nextBombs(ButtonsModel, arrNeighbors);
+    }
+}
+
+function getNeighbors(elem, size) {
+    let arrNeighbors = [];
+
+    let countCellsNum = +size,
+        id = elem.id;
+
+    if (id === 0) arrNeighbors.push(id+1, id+countCellsNum+1, id+countCellsNum);
+    else if (id === countCellsNum-1) arrNeighbors.push(id+countCellsNum, id+countCellsNum-1, id-1);
+    else if (id === countCellsNum*countCellsNum-countCellsNum) arrNeighbors.push(id-countCellsNum, id-countCellsNum+1, id+1);
+    else if (id === countCellsNum*countCellsNum-1) arrNeighbors.push(id-1, id-countCellsNum-1, id-countCellsNum);
+
+    else if (id > 0 && id < countCellsNum-1) arrNeighbors.push(id+1, id+countCellsNum+1, id+countCellsNum, id+countCellsNum-1, id-1);
+    else if (id > countCellsNum*countCellsNum-countCellsNum && id < countCellsNum*countCellsNum-1) arrNeighbors.push(id-1, id-countCellsNum-1, id-countCellsNum, id-countCellsNum+1, id+1);
+    else if (id % countCellsNum === 0) arrNeighbors.push(id-countCellsNum, id-countCellsNum+1, id+1, id+countCellsNum+1, id+countCellsNum);
+    else if ((id + 1) % countCellsNum === 0) arrNeighbors.push(id+countCellsNum, id+countCellsNum-1, id-1, id-countCellsNum-1, id-countCellsNum);
+    else arrNeighbors.push(id-countCellsNum, id-countCellsNum+1, id+1, id+countCellsNum+1, id+countCellsNum, id+countCellsNum-1, id-1, id-countCellsNum-1);
+
+    return arrNeighbors;
+}
+
+
+function nextBombs(ButtonsModel, arrNeighbors) {
+    arrNeighbors.forEach(id => {
+        if(ButtonsModel.getElemState(id) !== CLOSE_ZERO) countBombsAroundElem(ButtonsModel, ButtonsModel.arr[id]);
+    })
+}
+
+
+
+
